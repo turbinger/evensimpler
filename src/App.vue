@@ -3,7 +3,7 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from './stores/userStore'
 import MyForm from './components/MyForm.vue'
 
-const store = useUserStore()
+//const store = useUserStore()
 //const { appMessage } = storeToRefs(store)
 </script>
 
