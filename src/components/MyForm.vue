@@ -78,10 +78,16 @@ onMounted(() => {
 
 <template>
   <v-container>
-    <h1>{{ appMessage }}</h1>
+    <v-row align="center" justify="center">
+      <v-col class="text-center" cols="12">
+        <h1>{{ appMessage }}</h1>
+      </v-col></v-row>
 
     <v-card class="pa-3">
-      <v-btn color="secondary" class="mb-3" @click="handleCount">
+<!--      <v-btn color="secondary" class="mb-3" @click="handleCount">-->
+<!--        count is {{ count }}-->
+<!--      </v-btn>-->
+      <v-btn color="secondary" class="mb-3 mx-auto d-block" @click="handleCount">
         count is {{ count }}
       </v-btn>
       <v-text-field v-model="inputText" class="mb-3" label="Type something"></v-text-field>
