@@ -6,11 +6,9 @@ import { ref, computed } from 'vue'
 const store = useUserStore()
 const { tableData } = storeToRefs(store)
 
-// Sortierzustand
-const currentSortColumn = ref<string | null>(null) // Initial null
+const currentSortColumn = ref<string | null>(null)
 const isAscending = ref<boolean>(true)
 
-// Sortierbare Spalten definieren
 const columns = [
   { label: 'Food1', field: 'food1_id' },
   { label: 'Food2', field: 'food2_id' },
@@ -19,13 +17,12 @@ const columns = [
   { label: 'Excess', field: 'excess' }
 ]
 
-// Sortierte Daten als computed property
 const sortedData = computed(() => {
-  if (!tableData.value || !currentSortColumn.value) return tableData.value || [] // Leeres Array zurückgeben, wenn keine Sortierung aktiv ist
+  if (!tableData.value || !currentSortColumn.value) return tableData.value || []
 
   return [...tableData.value].sort((a, b) => {
-    const aValue = a[currentSortColumn.value!] // Nicht null, da im if geprüft
-    const bValue = b[currentSortColumn.value!] // Nicht null, da im if geprüft
+    const aValue = a[currentSortColumn.value!]
+    const bValue = b[currentSortColumn.value!]
 
     if (typeof aValue === 'number' && typeof bValue === 'number') {
       return isAscending.value ? aValue - bValue : bValue - aValue
@@ -37,7 +34,6 @@ const sortedData = computed(() => {
   })
 })
 
-// Sortierfunktion
 const sortBy = (field: string) => {
   if (currentSortColumn.value === field) {
     isAscending.value = !isAscending.value
@@ -49,9 +45,9 @@ const sortBy = (field: string) => {
 </script>
 
 <template>
-  <div class="container mt-4">
+  <v-container class="mt-4">
     <h3>Users:</h3>
-    <table class="table table-striped">
+    <v-table>
       <thead>
       <tr>
         <th
@@ -76,6 +72,6 @@ const sortBy = (field: string) => {
         <td>{{ row.excess }}</td>
       </tr>
       </tbody>
-    </table>
-  </div>
+    </v-table>
+  </v-container>
 </template>

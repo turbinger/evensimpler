@@ -5,6 +5,11 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '../stores/userStore'
 import MyTable from './MyTableClassic.vue'
 
+interface Food {
+  id: string | number
+  name: string
+}
+
 const store = useUserStore()
 const { count, inputText, appMessage, reversedText } = storeToRefs(store)
 const { updateCount, updateInputText, fetchUsers } = store
@@ -17,17 +22,8 @@ const updateInput = (event: Event): void => {
   updateInputText((event.target as HTMLInputElement).value)
 }
 
-const foods = ref([])
-const selectedFood = ref('')
-
-// const fetchFoods = async () => {
-//   try {
-//     const response = await axios.get('http://localhost:5000/api/foods')
-//     foods.value = response.data
-//   } catch (error) {
-//     console.error('Error fetching foods:', error)
-//   }
-// }
+const foods = ref<Food[]>([])
+const selectedFood = ref<Food | null>(null)
 
 const fetchFoods = async () => {
   try {
@@ -38,9 +34,34 @@ const fetchFoods = async () => {
     console.error('Error fetching foods:', error)
   }
 }
+
+// const sendSelectedFood = async () => {
+//   if (!selectedFood.value) return
+//
+//   try {
+//     console.log('Sending NDB_No:', selectedFood.value.id) // Debug log
+//     const response = await axios.post('http://localhost:5000/api/get_data',
+//         { NDB_No: selectedFood.value.id },
+//         {
+//           headers: {
+//             'Content-Type': 'application/json',
+//           }
+//         }
+//     )
+//     console.log('API Response:', response.data)
+//     store.updateTableData(response.data)
+//   } catch (error: any) {
+//     console.error('Error sending selected food:', error)
+//     if (error.response) {
+//       console.error('Error data:', error.response.data)
+//       console.error('Error status:', error.response.status)
+//     }
+//   }
+// }
+
 const sendSelectedFood = async () => {
   try {
-    const response = await axios.post('http://localhost:5000/api/get_data', { NDB_No: selectedFood.value })
+    const response = await axios.post('http://localhost:5000/api/get_data', { NDB_No: selectedFood.value.id })
     console.log('API Response:', response.data)
     store.updateTableData(response.data)
     console.log('TableData after update:', store.tableData)
@@ -56,42 +77,40 @@ onMounted(() => {
 </script>
 
 <template>
-  <h1>{{ appMessage }}</h1>
+  <v-container>
+    <h1>{{ appMessage }}</h1>
 
-  <div class="card p-3">
-    <button type="button" class="btn btn-secondary mb-3" @click="handleCount">
-      count is {{ count }}
-    </button>
-    <input
-        type="text"
-        :value="inputText"
-        @input="updateInput"
-        class="form-control mb-3"
-        placeholder="Type something"
-    />
-    <p>Rückwärts</p>
-    <div class="form-control mb-3">{{ reversedText }}</div>
+    <v-card class="pa-3">
+      <v-btn color="secondary" class="mb-3" @click="handleCount">
+        count is {{ count }}
+      </v-btn>
+      <v-text-field v-model="inputText" class="mb-3" label="Type something"></v-text-field>
+      <p>Rückwärts</p>
+      <v-text-field v-model="reversedText" class="mb-3" readonly></v-text-field>
 
-<!--    <select v-model="selectedFood" class="form-control mb-3">-->
-<!--      <option v-for="food in foods" :key="food.id" :value="food.id">-->
-<!--        {{ food.name }}-->
-<!--      </option>-->
-<!--    </select>-->
-<!--    <button type="button" class="btn btn-secondary mb-3" @click="sendSelectedFood">-->
-<!--      anzeigen-->
-<!--    </button>-->
+      <v-row class="mt-4">
+        <v-col>
+          <v-select
+              v-model="selectedFood"
+              :items="foods"
+              item-title="name"
+              item-value="id"
+              label="Select Food"
+              class="mb-3"
+              return-object
+          ></v-select>
+          <v-btn
+              color="secondary"
+              class="mb-3"
+              @click="sendSelectedFood"
+              :disabled="!selectedFood"
+          >
+            anzeigen
+          </v-btn>
+        </v-col>
+      </v-row>
 
-    <div class="d-flex justify-content-between">
-      <select v-model="selectedFood" class="form-control mb-3">
-        <option v-for="food in foods" :key="food.id" :value="food.id">
-          {{ food.name }}
-        </option>
-      </select>
-      <button type="button" class="btn btn-secondary mb-3" @click="sendSelectedFood">
-        anzeigen
-      </button>
-    </div>
-
-    <MyTable />
-  </div>
+      <MyTable />
+    </v-card>
+  </v-container>
 </template>
