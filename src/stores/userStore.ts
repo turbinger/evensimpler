@@ -1,6 +1,13 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 
+interface TableRow {
+    food1_id: string
+    food2_id: string
+    value1: number
+    value2: number
+    excess: number
+}
 interface User {
     id: number
     name: string
@@ -16,6 +23,7 @@ interface UserState {
     inputText: string
     appMessage: string
     messageUpdated: boolean
+    tableData: TableRow[]
 }
 
 const API_BASE_URL = 'http://localhost:5000/api'
@@ -26,7 +34,8 @@ export const useUserStore = defineStore('users', {
         users: [],
         inputText: '',
         appMessage: 'My First App',
-        messageUpdated: false
+        messageUpdated: false,
+        tableData: []
     }),
 
     getters: {
@@ -72,6 +81,37 @@ export const useUserStore = defineStore('users', {
 
         updateAppMessage(message: string): void {
             this.appMessage = message
+        },
+
+        updateTableData(data: TableRow[]): void {
+            console.log('Store receiving data:', data)
+            if (!Array.isArray(data)) {
+                console.error('Received data is not an array:', data)
+                return
+            }
+
+            // Validate data structure
+            const isValidData = data.every(row =>
+                'food1_id' in row &&
+                'food2_id' in row &&
+                'value1' in row &&
+                'value2' in row &&
+                'excess' in row
+            )
+
+            if (!isValidData) {
+                console.error('Data structure is invalid:', data)
+                return
+            }
+
+            this.tableData = [...data] // Create new array reference
+            console.log('Store updated tableData:', this.tableData)
         }
+
+        // updateTableData(data: TableRow[]): void {
+        //     console.log('Und jetzt: Updating table data:', data)
+        //     this.tableData = data
+        // }
+
     }
 })
