@@ -44,34 +44,61 @@ const sortBy = (field: string) => {
 }
 </script>
 
+<!--<template>-->
+<!--  <v-container class="mt-4">-->
+<!--    <h3>Users:</h3>-->
+<!--    <v-table>-->
+<!--      <thead>-->
+<!--      <tr>-->
+<!--        <th-->
+<!--            v-for="column in columns"-->
+<!--            :key="column.field"-->
+<!--            @click="sortBy(column.field)"-->
+<!--            style="cursor: pointer"-->
+<!--        >-->
+<!--          {{ column.label }}-->
+<!--          <span v-if="currentSortColumn === column.field">-->
+<!--              {{ isAscending ? '▲' : '▼' }}-->
+<!--            </span>-->
+<!--        </th>-->
+<!--      </tr>-->
+<!--      </thead>-->
+<!--      <tbody>-->
+<!--      <tr v-for="(row, index) in sortedData" :key="index">-->
+<!--        <td>{{ row.food1_id }}</td>-->
+<!--        <td>{{ row.food2_id }}</td>-->
+<!--        <td>{{ row.value1 }}</td>-->
+<!--        <td>{{ row.value2 }}</td>-->
+<!--        <td>{{ row.excess }}</td>-->
+<!--      </tr>-->
+<!--      </tbody>-->
+<!--    </v-table>-->
+<!--  </v-container>-->
+<!--</template>-->
+
 <template>
-  <v-container class="mt-4">
-    <h3>Users:</h3>
-    <v-table>
-      <thead>
-      <tr>
-        <th
-            v-for="column in columns"
-            :key="column.field"
-            @click="sortBy(column.field)"
-            style="cursor: pointer"
-        >
-          {{ column.label }}
-          <span v-if="currentSortColumn === column.field">
-              {{ isAscending ? '▲' : '▼' }}
-            </span>
-        </th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr v-for="(row, index) in sortedData" :key="index">
-        <td>{{ row.food1_id }}</td>
-        <td>{{ row.food2_id }}</td>
-        <td>{{ row.value1 }}</td>
-        <td>{{ row.value2 }}</td>
-        <td>{{ row.excess }}</td>
-      </tr>
-      </tbody>
-    </v-table>
-  </v-container>
+  <v-table density="compact" class="elevation-1">  <thead>
+  <tr>
+    <th
+        v-for="column in columns"
+        :key="column.field"
+        @click="sortBy(column.field)"
+        style="cursor: pointer; white-space: nowrap;"  >
+      {{ column.label }}
+      <span v-if="currentSortColumn === column.field">
+            {{ isAscending ? '▲' : '▼' }}
+          </span>
+    </th>
+  </tr>
+  </thead>
+    <tbody>
+    <tr v-for="(row, index) in sortedData" :key="index">
+      <td>{{ row.food1_id }}</td>
+      <td>{{ row.food2_id }}</td>
+      <td>{{ row.value1 }}</td>
+      <td>{{ row.value2 }}</td>
+      <td>{{ row.excess }}</td>
+    </tr>
+    </tbody>
+  </v-table>
 </template>

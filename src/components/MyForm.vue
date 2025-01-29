@@ -76,47 +76,161 @@ onMounted(() => {
 })
 </script>
 
-<template>
-  <v-container>
-    <v-row align="center" justify="center">
-      <v-col class="text-center" cols="12">
-        <h1>{{ appMessage }}</h1>
-      </v-col></v-row>
+<!--Ursprüngliches Layout:-->
 
-    <v-card class="pa-3">
+<!--<template>-->
+<!--  <v-container>-->
+<!--    <h1>{{ appMessage }}</h1>-->
+
+
+<!--    <v-card class="pa-3">-->
 <!--      <v-btn color="secondary" class="mb-3" @click="handleCount">-->
 <!--        count is {{ count }}-->
 <!--      </v-btn>-->
-      <v-btn color="secondary" class="mb-3 mx-auto d-block" @click="handleCount">
-        count is {{ count }}
-      </v-btn>
-      <v-text-field v-model="inputText" class="mb-3" label="Type something"></v-text-field>
-      <p>Rückwärts</p>
-      <v-text-field v-model="reversedText" class="mb-3" readonly></v-text-field>
+<!--&lt;!&ndash;      <v-btn color="secondary" class="mb-3 mx-auto d-block" @click="handleCount">&ndash;&gt;-->
+<!--&lt;!&ndash;        count is {{ count }}&ndash;&gt;-->
+<!--&lt;!&ndash;      </v-btn>&ndash;&gt;-->
+<!--      <v-text-field v-model="inputText" class="mb-3" label="Type something"></v-text-field>-->
+<!--      <p>Rückwärts</p>-->
+<!--      <v-text-field v-model="reversedText" class="mb-3" readonly></v-text-field>-->
 
-      <v-row class="mt-4">
-        <v-col>
-          <v-select
-              v-model="selectedFood"
-              :items="foods"
-              item-title="name"
-              item-value="id"
-              label="Select Food"
-              class="mb-3"
-              return-object
-          ></v-select>
-          <v-btn
-              color="secondary"
-              class="mb-3"
-              @click="sendSelectedFood"
-              :disabled="!selectedFood"
-          >
-            anzeigen
-          </v-btn>
-        </v-col>
-      </v-row>
+<!--      <v-row class="mt-4">-->
+<!--        <v-col>-->
+<!--          <v-select-->
+<!--              v-model="selectedFood"-->
+<!--              :items="foods"-->
+<!--              item-title="name"-->
+<!--              item-value="id"-->
+<!--              label="Select Food"-->
+<!--              class="mb-3"-->
+<!--              return-object-->
+<!--          ></v-select>-->
+<!--          <v-btn-->
+<!--              color="secondary"-->
+<!--              class="mb-3"-->
+<!--              @click="sendSelectedFood"-->
+<!--              :disabled="!selectedFood"-->
+<!--          >-->
+<!--            anzeigen-->
+<!--          </v-btn>-->
+<!--        </v-col>-->
+<!--      </v-row>-->
 
-      <MyTable />
-    </v-card>
-  </v-container>
+<!--      <MyTable />-->
+<!--    </v-card>-->
+<!--  </v-container>-->
+<!--</template>-->
+
+<!--Besseres Layout:-->
+
+<template>
+  <v-app>
+    <v-main class="d-flex align-center justify-center">
+      <v-container fluid>
+        <v-row justify="center">
+          <v-col cols="12" md="8" lg="6">
+            <v-card class="pa-6">
+<!--              <v-card-title class="text-center">-->
+<!--                <h1>{{ appMessage }}</h1>-->
+<!--              </v-card-title>-->
+
+
+<!--              <v-card-title class="text-center" :no-wrap="false">-->
+<!--                <h1>{{ appMessage }}</h1>-->
+<!--              </v-card-title>-->
+
+              <v-card-text class="text-center">
+              <h1>{{ appMessage }}</h1>
+              </v-card-text>
+
+              <v-card-text>
+                <v-btn color="secondary" class="mb-3 mx-auto d-block" @click="handleCount">
+                  count is {{ count }}
+                </v-btn>
+
+                <v-text-field v-model="inputText" class="mb-3" label="Type something"></v-text-field>
+                <p class="text-center">Rückwärts</p>
+                <v-text-field v-model="reversedText" class="mb-3" readonly></v-text-field>
+
+                <v-row class="mt-4">
+                  <v-col>
+                    <v-select
+                        v-model="selectedFood"
+                        :items="foods"
+                        item-title="name"
+                        item-value="id"
+                        label="Select Food"
+                        class="mb-3"
+                        return-object
+                    ></v-select>
+                    <v-btn
+                        color="secondary"
+                        class="mb-3 mx-auto d-block"
+                        @click="sendSelectedFood"
+                        :disabled="!selectedFood"
+                    >
+                      anzeigen
+                    </v-btn>
+                  </v-col>
+                </v-row>
+
+                <MyTable />
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-container>
+    </v-main>
+  </v-app>
 </template>
+
+<!--<template>-->
+<!--  <v-app>-->
+<!--    <v-main class="d-flex align-center justify-center">-->
+<!--      <v-container fluid>-->
+<!--        <v-row justify="center">-->
+<!--          <v-col cols="12"> <v-card class="pa-6">-->
+<!--            <v-card-title class="text-center">-->
+<!--              <h1>{{ appMessage }}</h1>-->
+<!--            </v-card-title>-->
+
+<!--            <v-card-text>-->
+<!--              <v-btn color="secondary" class="mb-3 mx-auto d-block" @click="handleCount">-->
+<!--                count is {{ count }}-->
+<!--              </v-btn>-->
+
+<!--              <v-text-field v-model="inputText" class="mb-3" label="Type something"></v-text-field>-->
+<!--              <p class="text-center">Rückwärts</p>-->
+<!--              <v-text-field v-model="reversedText" class="mb-3" readonly></v-text-field>-->
+
+<!--              <v-row class="mt-4">-->
+<!--                <v-col>-->
+<!--                  <v-select-->
+<!--                      v-model="selectedFood"-->
+<!--                      :items="foods"-->
+<!--                      item-title="name"-->
+<!--                      item-value="id"-->
+<!--                      label="Select Food"-->
+<!--                      class="mb-3"-->
+<!--                      return-object-->
+<!--                  ></v-select>-->
+<!--                  <v-btn-->
+<!--                      color="secondary"-->
+<!--                      class="mb-3 mx-auto d-block"-->
+<!--                      @click="sendSelectedFood"-->
+<!--                      :disabled="!selectedFood"-->
+<!--                  >-->
+<!--                    anzeigen-->
+<!--                  </v-btn>-->
+<!--                </v-col>-->
+<!--              </v-row>-->
+
+<!--              <MyTable />-->
+<!--            </v-card-text>-->
+<!--          </v-card>-->
+<!--          </v-col>-->
+<!--        </v-row>-->
+<!--      </v-container>-->
+<!--    </v-main>-->
+<!--  </v-app>-->
+<!--</template>-->
