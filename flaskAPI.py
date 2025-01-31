@@ -90,16 +90,23 @@ def update_users():
 @app.route('/api/get_data', methods=['POST'])
 def get_data():
     ndb_no = request.json.get('NDB_No')
+    foodgroup1 = request.json.get('foodgroup1')
+    foodgroup2 = request.json.get('foodgroup2')
+
     if not ndb_no:
         return jsonify({'error': 'NDB_No is required'}), 400
 
     try:
         conn = mysql.connector.connect(**db_config)
         cursor = conn.cursor(dictionary=True)
+
+        # Basis-Query
         query = """
             SELECT
                food_desc1.Shrt_Desc AS food1_id,
                food_desc2.Shrt_Desc AS food2_id,
+               food_desc1.NDB_No AS ndb_no1,
+               food_desc2.NDB_No AS ndb_no2,
                value1,
                value2,
                excess
@@ -107,17 +114,106 @@ def get_data():
             JOIN food_desc food_desc1 ON concat(result.food1_id) = food_desc1.NDB_No
             JOIN food_desc food_desc2 ON concat(result.food2_id) = food_desc2.NDB_No
             WHERE (food1_id = %s OR food2_id = %s)
-            ORDER BY excess ASC
-            LIMIT 50
         """
-        #cursor.execute(query, (ndb_no, ndb_no))
-        cursor.execute(query, (ndb_no, ndb_no))
+
+        params = [ndb_no, ndb_no]
+
+        # Wenn Foodgroups ausgewählt wurden, erweitere die Query
+        if foodgroup1 or foodgroup2:
+            foodgroup_conditions = []
+            if foodgroup1:
+                # Wenn das ausgewählte Lebensmittel food1_id ist
+                foodgroup_conditions.append("""
+                    ((food1_id = %s AND food_desc2.FdGrp_Cd = %s) OR
+                     (food2_id = %s AND food_desc1.FdGrp_Cd = %s))
+                """)
+                params.extend([ndb_no, foodgroup1, ndb_no, foodgroup1])
+
+            if foodgroup2:
+                # Wenn eine zweite Foodgroup ausgewählt wurde
+                foodgroup_conditions.append("""
+                    ((food1_id = %s AND food_desc2.FdGrp_Cd = %s) OR
+                     (food2_id = %s AND food_desc1.FdGrp_Cd = %s))
+                """)
+                params.extend([ndb_no, foodgroup2, ndb_no, foodgroup2])
+
+            # Verbinde die Bedingungen mit OR wenn beide Foodgroups ausgewählt sind
+            if foodgroup_conditions:
+                query += " AND (" + " OR ".join(foodgroup_conditions) + ")"
+
+        query += " ORDER BY excess ASC LIMIT 50"
+
+        cursor.execute(query, params)
         results = cursor.fetchall()
         cursor.close()
         conn.close()
         return jsonify(results)
     except mysql.connector.Error as err:
         return jsonify({'error': str(err)}), 500
+
+@app.route('/api/get_nutrients', methods=['POST'])
+def get_nutrients():
+    ndb_no = request.json.get('NDB_No')
+    if not ndb_no:
+        return jsonify({'error': 'NDB_No is required'}), 400
+
+    try:
+        conn = mysql.connector.connect(**db_config)
+        cursor = conn.cursor(dictionary=True)
+        query = """
+            SELECT NDB_No, FAT_204_g, CAL_208_kcal, PRO_203_g,
+                   TRP_501_g, THR_502_g, ILE_503_g, LEU_504_g,
+                   LYS_505_g, MET_CYS_506_507, PHE_TYR_508_509,
+                   VAL_510_g, HIS_512_g
+            FROM newprepddata
+            WHERE NDB_No = %s
+        """
+        cursor.execute(query, (ndb_no,))
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        return jsonify(result)
+    except mysql.connector.Error as err:
+        return jsonify({'error': str(err)}), 500
+
+
+
+
+
+
+# ursprüngliche route:
+# @app.route('/api/get_data', methods=['POST'])
+# def get_data():
+#     ndb_no = request.json.get('NDB_No')
+#     if not ndb_no:
+#         return jsonify({'error': 'NDB_No is required'}), 400
+#
+#     try:
+#         conn = mysql.connector.connect(**db_config)
+#         cursor = conn.cursor(dictionary=True)
+#         query = """
+#             SELECT
+#                food_desc1.Shrt_Desc AS food1_id,
+#                food_desc2.Shrt_Desc AS food2_id,
+#                value1,
+#                value2,
+#                excess
+#             FROM result
+#             JOIN food_desc food_desc1 ON concat(result.food1_id) = food_desc1.NDB_No
+#             JOIN food_desc food_desc2 ON concat(result.food2_id) = food_desc2.NDB_No
+#             WHERE (food1_id = %s OR food2_id = %s)
+#             ORDER BY excess ASC
+#             LIMIT 50
+#         """
+#         #cursor.execute(query, (ndb_no, ndb_no))
+#         cursor.execute(query, (ndb_no, ndb_no))
+#         results = cursor.fetchall()
+#         cursor.close()
+#         conn.close()
+#         return jsonify(results)
+#     except mysql.connector.Error as err:
+#         return jsonify({'error': str(err)}), 500
+
 
 '''
 Route kann Daten als Objekt oder nur die ID bekommen

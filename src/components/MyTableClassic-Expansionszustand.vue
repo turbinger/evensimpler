@@ -5,7 +5,7 @@ import { useUserStore } from '../stores/userStore'
 import type { TableRow } from '../stores/userStore'
 
 const store = useUserStore()
-const { tableData, selectedFoodNutrients, expandedFoodNutrientsList } = storeToRefs(store)
+const { tableData, selectedFoodNutrients, expandedFoodNutrients } = storeToRefs(store)
 
 const headers = [
   { title: 'Food1', key: 'food1_id' },
@@ -16,28 +16,35 @@ const headers = [
 ]
 
 const expanded = ref<string[]>([])
+const previousExpanded = ref<string[]>([])
 
-const handleExpand = async (expandedRows: string[]) => {
-  for (const food2Id of expandedRows) {
-    const row = tableData.value.find(r => r.food2_id === food2Id)
+const handleExpand = async (newExpandedItems: string[]) => {
+  if (!newExpandedItems) return;
 
-    if (row && row.ndb_no2) {
-      await store.updateExpandedFoodNutrients(row.ndb_no2, food2Id);
+  // Find newly expanded items by comparing with previous state
+  const newlyExpanded = newExpandedItems.filter(id => !previousExpanded.value.includes(id));
+
+  // For each newly expanded item, fetch its nutrient data
+  for (const expandedId of newlyExpanded) {
+    const expandedItem = tableData.value.find(item => item.food2_id === expandedId);
+    if (expandedItem?.ndb_no2) {
+      console.log('Fetching nutrients for NDB_No:', expandedItem.ndb_no2);
+      await store.updateExpandedFoodNutrients(expandedItem.ndb_no2);
     }
   }
+
+  // Update previous state
+  previousExpanded.value = newExpandedItems;
 }
 
+// Update the calculateTotals function to use TableRow type
 const calculateTotals = (item: TableRow) => {
-  if (!selectedFoodNutrients.value) return null
-
-  const expandedFoodNutrients = expandedFoodNutrientsList.value[item.food2_id]
-
-  if (!expandedFoodNutrients) return null
+  if (!selectedFoodNutrients.value || !expandedFoodNutrients.value) return null
 
   const totalMass = item.value1 + item.value2
   const totalEnergy =
       (selectedFoodNutrients.value.CAL_208_kcal * item.value1 / 100) +
-      (expandedFoodNutrients.CAL_208_kcal * item.value2 / 100)
+      (expandedFoodNutrients.value.CAL_208_kcal * item.value2 / 100)
 
   return {
     mass: totalMass.toFixed(2),
@@ -58,7 +65,7 @@ const calculateTotals = (item: TableRow) => {
   >
     <template v-slot:expanded-row="{ item }">
       <td :colspan="headers.length">
-        <v-card flat v-if="selectedFoodNutrients && expandedFoodNutrientsList[item.food2_id]">
+        <v-card flat v-if="selectedFoodNutrients && expandedFoodNutrients">
           <v-card-text>
             <div class="d-flex justify-space-around">
               <div>
