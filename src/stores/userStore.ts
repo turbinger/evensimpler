@@ -29,11 +29,11 @@ interface UserState {
     tableData: TableRow[];
     selectedFoodNutrients: NutrientData | null;
     expandedFoodNutrients: NutrientData | null;
-    expandedFoodNutrientsList: { [food2_id: string]: NutrientData };
+    expandedFoodNutrientsList: { [ndb_no2: number]: NutrientData };
 }
 
 interface NutrientData {
-    NDB_No: string;
+    NDB_No: number;
     FAT_204_g: number;
     CAL_208_kcal: number;
     PRO_203_g: number;
@@ -110,6 +110,7 @@ export const useUserStore = defineStore('users', {
         updateTableData(data: TableRow[]): void {
             if (!Array.isArray(data)) {
                 console.error('Received data is not an array:', data);
+                this.clearAllExpandedFoodNutrients
                 return;
                 this.tableData = data;
             }
@@ -145,11 +146,19 @@ export const useUserStore = defineStore('users', {
             this.selectedFoodNutrients = await this.fetchNutrientData(ndbNo);
         },
 
-        async updateExpandedFoodNutrients(ndbNo: number, food2Id: string): Promise<void> {
-            const nutrients = await this.fetchNutrientData(ndbNo);
+        async updateExpandedFoodNutrients(ndb_no: number): Promise<void> {
+            const nutrients = await this.fetchNutrientData(ndb_no);
             if (nutrients) {
-                this.expandedFoodNutrientsList[food2Id] = nutrients;
+                this.expandedFoodNutrientsList[ndb_no] = nutrients;
             }
         },
+
+        clearExpandedFoodNutrients(ndb_no: number) {
+            delete this.expandedFoodNutrientsList[ndb_no]
+        },
+
+        clearAllExpandedFoodNutrients() {
+            this.expandedFoodNutrientsList = {}
+        },        
     }
 });
