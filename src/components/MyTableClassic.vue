@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '../stores/userStore'
 import type { TableRow } from '../stores/userStore'
+//import type { VDataTable } from 'vuetify/components'
+
 
 const store = useUserStore()
 const { tableData, selectedFoodNutrients, expandedFoodNutrientsList } = storeToRefs(store)
@@ -12,25 +14,35 @@ const headers = [
   { title: 'Food2', key: 'food2_id' },
   { title: 'Amount1', key: 'value1' },
   { title: 'Amount2', key: 'value2' },
-  { title: 'Excess', key: 'excess' }
+  { title: 'Excess', key: 'excess' },
+  { title: 'NDB', key: 'ndb_no2', hidden: true } // Hide from display
 ]
 
 const expanded = ref<string[]>([])
 
 const handleExpand = async (expandedRows: string[]) => {
-  for (const food2Id of expandedRows) {
-    const row = tableData.value.find(r => r.food2_id === food2Id)
-
-    if (row && row.ndb_no2) {
-      await store.updateExpandedFoodNutrients(row.ndb_no2, food2Id);
+  // Get previously expanded rows that are now collapsed
+  const collapsedRows = expanded.value.filter(row => !expandedRows.includes(row))
+  
+  // Clear collapsed rows from store
+  for (const ndb_no2 of collapsedRows) {
+    store.clearExpandedFoodNutrients(Number(ndb_no2))
+  }
+  
+  // Update expanded rows
+  for (const ndb_no2 of expandedRows) {
+    if (!expandedFoodNutrientsList.value[Number(ndb_no2)]) {
+      await store.updateExpandedFoodNutrients(Number(ndb_no2))
     }
   }
+  
+  expanded.value = expandedRows
 }
 
 const calculateTotals = (item: TableRow) => {
   if (!selectedFoodNutrients.value) return null
 
-  const expandedFoodNutrients = expandedFoodNutrientsList.value[item.food2_id]
+  const expandedFoodNutrients = expandedFoodNutrientsList.value[item.ndb_no2]
 
   if (!expandedFoodNutrients) return null
 
@@ -44,32 +56,29 @@ const calculateTotals = (item: TableRow) => {
     energy: totalEnergy.toFixed(2)
   }
 }
+
+watch(() => tableData.value, () => {
+    expanded.value = [] // Reset expanded rows when table data changes
+})
 </script>
 
 <template>
   <v-data-table
-      :headers="headers"
-      :items="tableData"
-      v-model:expanded="expanded"
-      show-expand
-      density="compact"
-      item-value="food2_id"
-      @update:expanded="handleExpand"
+    :headers="headers"
+    :items="tableData"
+    :expanded="expanded"
+    item-value="ndb_no2"
+    show-expand
+    @update:expanded="handleExpand"
   >
     <template v-slot:expanded-row="{ item }">
       <td :colspan="headers.length">
-        <v-card flat v-if="selectedFoodNutrients && expandedFoodNutrientsList[item.food2_id]">
-          <v-card-text>
-            <div class="d-flex justify-space-around">
-              <div>
-                <h3>Gesamtmasse: {{ calculateTotals(item)?.mass }} g</h3>
-              </div>
-              <div>
-                <h3>Gesamtenergie: {{ calculateTotals(item)?.energy }} kcal</h3>
-              </div>
-            </div>
-          </v-card-text>
-        </v-card>
+        <v-container v-if="calculateTotals(item)">
+          <v-row>
+            <v-col>Mass: {{ calculateTotals(item)?.mass }} g</v-col>
+            <v-col>Energy: {{ calculateTotals(item)?.energy }} kcal</v-col>
+          </v-row>
+        </v-container>
       </td>
     </template>
   </v-data-table>
