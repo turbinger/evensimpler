@@ -145,6 +145,11 @@ def get_data():
 
         cursor.execute(query, params)
         results = cursor.fetchall()
+        for row in results:
+            if row["ndb_no2"] == ndb_no:
+                row["ndb_no1"], row["ndb_no2"] = row["ndb_no2"], row["ndb_no1"]
+                row["food1_id"], row["food2_id"] = row["food2_id"], row["food1_id"]
+                row["value1"], row["value2"] = row["value2"], row["value1"]
         cursor.close()
         conn.close()
         return jsonify(results)

@@ -1,38 +1,24 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '../stores/userStore'
 import type { TableRow } from '../stores/userStore'
-//import type { VDataTable } from 'vuetify/components'
 import AminoAcidChart from './AminoAcidChart.vue'
 
 
 const store = useUserStore()
 const { tableData, selectedFoodNutrients, expandedFoodNutrientsList } = storeToRefs(store)
 
-// const headers = [
-//   { title: 'Food1', key: 'food1_id' },
-//   { title: 'Food2', key: 'food2_id' },
-//   { title: 'Amount1', key: 'value1' },
-//   { title: 'Amount2', key: 'value2' },
-//   { title: 'Excess', key: 'excess' },
-//   { title: 'NDB', key: 'ndb_no2', hidden: true } // Hide from display
-// ]
 const headers = [
-  { title: 'Food1', key: 'food1_id' },
-  { title: 'Food2', key: 'food2_id' },
+  { title: 'Food1', key: 'food1_id', hidden: true },
+  { title: '+Food2', key: 'food2_id' },
   { title: 'Amount1', key: 'value1' },
   { title: 'Amount2', key: 'value2' },
   { title: 'Excess', key: 'excess' },
-  {
-    title: 'NDB',
-    key: 'ndb_no2',
-    sortable: false,
-    filterable: false,
-    width: '0px',
-    class: 'hidden'
-  }
+  { title: 'NDB', key: 'ndb_no2', hidden: true }
 ]
+
+const displayedHeaders = computed(() => headers.filter(h => !h.hidden))
 
 const expanded = ref<string[]>([])
 
@@ -80,7 +66,7 @@ watch(() => tableData.value, () => {
 
 <template>
   <v-data-table
-      :headers="headers"
+      :headers="displayedHeaders"
       :items="tableData"
       :expanded="expanded"
       item-value="ndb_no2"
