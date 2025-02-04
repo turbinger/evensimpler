@@ -4,18 +4,34 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '../stores/userStore'
 import type { TableRow } from '../stores/userStore'
 //import type { VDataTable } from 'vuetify/components'
+import AminoAcidChart from './AminoAcidChart.vue'
 
 
 const store = useUserStore()
 const { tableData, selectedFoodNutrients, expandedFoodNutrientsList } = storeToRefs(store)
 
+// const headers = [
+//   { title: 'Food1', key: 'food1_id' },
+//   { title: 'Food2', key: 'food2_id' },
+//   { title: 'Amount1', key: 'value1' },
+//   { title: 'Amount2', key: 'value2' },
+//   { title: 'Excess', key: 'excess' },
+//   { title: 'NDB', key: 'ndb_no2', hidden: true } // Hide from display
+// ]
 const headers = [
   { title: 'Food1', key: 'food1_id' },
   { title: 'Food2', key: 'food2_id' },
   { title: 'Amount1', key: 'value1' },
   { title: 'Amount2', key: 'value2' },
   { title: 'Excess', key: 'excess' },
-  { title: 'NDB', key: 'ndb_no2', hidden: true } // Hide from display
+  {
+    title: 'NDB',
+    key: 'ndb_no2',
+    sortable: false,
+    filterable: false,
+    width: '0px',
+    class: 'hidden'
+  }
 ]
 
 const expanded = ref<string[]>([])
@@ -23,19 +39,19 @@ const expanded = ref<string[]>([])
 const handleExpand = async (expandedRows: string[]) => {
   // Get previously expanded rows that are now collapsed
   const collapsedRows = expanded.value.filter(row => !expandedRows.includes(row))
-  
+
   // Clear collapsed rows from store
   for (const ndb_no2 of collapsedRows) {
     store.clearExpandedFoodNutrients(Number(ndb_no2))
   }
-  
+
   // Update expanded rows
   for (const ndb_no2 of expandedRows) {
     if (!expandedFoodNutrientsList.value[Number(ndb_no2)]) {
       await store.updateExpandedFoodNutrients(Number(ndb_no2))
     }
   }
-  
+
   expanded.value = expandedRows
 }
 
@@ -58,25 +74,35 @@ const calculateTotals = (item: TableRow) => {
 }
 
 watch(() => tableData.value, () => {
-    expanded.value = [] // Reset expanded rows when table data changes
+  expanded.value = [] // Reset expanded rows when table data changes
 })
 </script>
 
 <template>
   <v-data-table
-    :headers="headers"
-    :items="tableData"
-    :expanded="expanded"
-    item-value="ndb_no2"
-    show-expand
-    @update:expanded="handleExpand"
+      :headers="headers"
+      :items="tableData"
+      :expanded="expanded"
+      item-value="ndb_no2"
+      show-expand
+      @update:expanded="handleExpand"
   >
     <template v-slot:expanded-row="{ item }">
       <td :colspan="headers.length">
-        <v-container v-if="calculateTotals(item)">
+        <v-container>
           <v-row>
-            <v-col>Mass: {{ calculateTotals(item)?.mass }} g</v-col>
-            <v-col>Energy: {{ calculateTotals(item)?.energy }} kcal</v-col>
+            <v-col cols="12" md="4">
+              <div>Mass: {{ calculateTotals(item)?.mass }} g</div>
+              <div>Energy: {{ calculateTotals(item)?.energy }} kcal</div>
+            </v-col>
+            <v-col cols="12" md="8">
+              <AminoAcidChart
+                  v-if="selectedFoodNutrients && expandedFoodNutrientsList[item.ndb_no2]"
+                  :item="item"
+                  :selected-nutrients="selectedFoodNutrients"
+                  :expanded-nutrients="expandedFoodNutrientsList[item.ndb_no2]"
+              />
+            </v-col>
           </v-row>
         </v-container>
       </td>

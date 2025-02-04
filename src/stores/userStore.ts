@@ -7,8 +7,8 @@ export interface TableRow {
     value1: number;
     value2: number;
     excess: number;
-    ndb_no1: number;  // Add NDB number for food 1
-    ndb_no2: number;  // Add NDB number for food 2
+    ndb_no1: number;
+    ndb_no2: number;
 }
 
 interface User {
@@ -111,8 +111,8 @@ export const useUserStore = defineStore('users', {
             if (!Array.isArray(data)) {
                 console.error('Received data is not an array:', data);
                 this.clearAllExpandedFoodNutrients
+                this.tableData = data; //was unreachable below return
                 return;
-                this.tableData = data;
             }
 
             const isValidData = data.every(row =>
@@ -159,6 +159,6 @@ export const useUserStore = defineStore('users', {
 
         clearAllExpandedFoodNutrients() {
             this.expandedFoodNutrientsList = {}
-        },        
+        },
     }
 });
