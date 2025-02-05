@@ -16,7 +16,9 @@ const { selectedFoodNutrients, expandedFoodNutrientsList } = storeToRefs(store)
 const emit = defineEmits(['chart-click'])
 const props = defineProps<{
   item: TableRow,
-  fullSize?: boolean
+  fullSize?: boolean,
+  food1AloneValues: number[],
+  food2AloneValues: number[]
 }>()
 
 const chartData = computed<ChartData<'bar'>>(() => {
@@ -35,23 +37,23 @@ const chartData = computed<ChartData<'bar'>>(() => {
 
   const referenceValues = AMINO_ACIDS.map(aa => aa.reference)
 
-  // Food 1 alone calculation
-  const food1_aa = AMINO_ACIDS.map(aa =>
-      (selectedFoodNutrients.value?.[aa.key as keyof typeof selectedFoodNutrients.value] ?? 0) / 100
-  )
-  const food1Ratios = food1_aa.map((val, i) => val / (referenceValues[i] || 1))
-  const minFood1Ratio = Math.min(...food1Ratios.filter(r => r > 0))
-  const scaleFood1 = 1 / (minFood1Ratio || 1)
-  const food1_aloneValues = food1_aa.map(val => val * scaleFood1)
+  /*   // Food 1 alone calculation
+    const food1_aa = AMINO_ACIDS.map(aa =>
+        (selectedFoodNutrients.value?.[aa.key as keyof typeof selectedFoodNutrients.value] ?? 0) / 100
+    )
+    const food1Ratios = food1_aa.map((val, i) => val / (referenceValues[i] || 1))
+    const minFood1Ratio = Math.min(...food1Ratios.filter(r => r > 0))
+    const scaleFood1 = 1 / (minFood1Ratio || 1)
+    const food1_aloneValues = food1_aa.map(val => val * scaleFood1)
 
-  // Food 2 alone calculation
-  const food2_aa = AMINO_ACIDS.map(aa =>
-      ((expandedFoodNutrientsList.value[props.item.ndb_no2][aa.key as keyof typeof expandedFoodNutrientsList.value[typeof props.item.ndb_no2]]) ?? 0) / 100
-  )
-  const food2Ratios = food2_aa.map((val, i) => val / (referenceValues[i] || 1))
-  const minFood2Ratio = Math.min(...food2Ratios.filter(r => r > 0))
-  const scaleFood2 = 1 / (minFood2Ratio || 1)
-  const food2_aloneValues = food2_aa.map(val => val * scaleFood2)
+    // Food 2 alone calculation
+    const food2_aa = AMINO_ACIDS.map(aa =>
+        ((expandedFoodNutrientsList.value[props.item.ndb_no2][aa.key as keyof typeof expandedFoodNutrientsList.value[typeof props.item.ndb_no2]]) ?? 0) / 100
+    )
+    const food2Ratios = food2_aa.map((val, i) => val / (referenceValues[i] || 1))
+    const minFood2Ratio = Math.min(...food2Ratios.filter(r => r > 0))
+    const scaleFood2 = 1 / (minFood2Ratio || 1)
+    const food2_aloneValues = food2_aa.map(val => val * scaleFood2) */
 
 
   return {
@@ -77,13 +79,13 @@ const chartData = computed<ChartData<'bar'>>(() => {
       },
       {
         label: 'Food 1 alone',
-        data: food1_aloneValues,
+        data: props.food1AloneValues,
         backgroundColor: 'rgba(255, 205, 86, 0.5)',
         stack: 'food1_alone'
       },
       {
         label: 'Food 2 alone',
-        data: food2_aloneValues,
+        data: props.food2AloneValues,
         backgroundColor: 'rgba(201, 203, 207, 0.5)',
         stack: 'food2_alone'
       }

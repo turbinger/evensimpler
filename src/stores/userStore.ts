@@ -46,6 +46,7 @@ interface NutrientData {
     PHE_TYR_508_509: number;
     VAL_510_g: number;
     HIS_512_g: number;
+    [key: string]: number;
 }
 
 const API_BASE_URL = 'http://localhost:5000/api';
