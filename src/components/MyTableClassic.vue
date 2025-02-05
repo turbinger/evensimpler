@@ -62,6 +62,14 @@ const calculateTotals = (item: TableRow) => {
 watch(() => tableData.value, () => {
   expanded.value = [] // Reset expanded rows when table data changes
 })
+
+const dialogOpen = ref(false)
+const selectedChartItem = ref<TableRow | null>(null)
+
+const openLargeChart = (item: TableRow) => {
+  selectedChartItem.value = item
+  dialogOpen.value = true
+}
 </script>
 
 <template>
@@ -78,6 +86,7 @@ watch(() => tableData.value, () => {
         <v-container>
           <v-row>
             <v-col cols="12" md="4">
+              <div><h5>food combination</h5></div>
               <div>Mass: {{ calculateTotals(item)?.mass }} g</div>
               <div>Energy: {{ calculateTotals(item)?.energy }} kcal</div>
             </v-col>
@@ -87,6 +96,7 @@ watch(() => tableData.value, () => {
                   :item="item"
                   :selected-nutrients="selectedFoodNutrients"
                   :expanded-nutrients="expandedFoodNutrientsList[item.ndb_no2]"
+                  @chart-click="() => openLargeChart(item)"
               />
             </v-col>
           </v-row>
@@ -94,4 +104,32 @@ watch(() => tableData.value, () => {
       </td>
     </template>
   </v-data-table>
+  <v-dialog
+      v-model="dialogOpen"
+      width="75%"
+      height="85%"
+      :max-width="'75vw'"
+      :max-height="'75vh'"
+      transition="dialog-bottom-transition"
+  >
+    <v-card>
+      <v-toolbar
+          dark
+          color="primary"
+      >
+        <v-btn icon @click="dialogOpen = false">
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+        <v-toolbar-title>Amino Acid Details</v-toolbar-title>
+      </v-toolbar>
+
+      <v-card-text class="pa-0">
+        <AminoAcidChart
+            v-if="selectedChartItem && selectedFoodNutrients && expandedFoodNutrientsList[selectedChartItem.ndb_no2]"
+            :item="selectedChartItem"
+            :full-size="true"
+        />
+      </v-card-text>
+    </v-card>
+  </v-dialog>
 </template>

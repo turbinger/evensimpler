@@ -13,8 +13,10 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 const store = useUserStore()
 const { selectedFoodNutrients, expandedFoodNutrientsList } = storeToRefs(store)
 
+const emit = defineEmits(['chart-click'])
 const props = defineProps<{
-  item: TableRow
+  item: TableRow,
+  fullSize?: boolean
 }>()
 
 const chartData = computed<ChartData<'bar'>>(() => {
@@ -89,8 +91,9 @@ const chartData = computed<ChartData<'bar'>>(() => {
   }
 })
 
-const chartOptions: ChartOptions<'bar'> = {
+const chartOptions = computed<ChartOptions<'bar'>>(() => ({
   responsive: true,
+  maintainAspectRatio: !props.fullSize, // Skalierung im Dialog
   scales: {
     y: {
       beginAtZero: true,
@@ -116,11 +119,26 @@ const chartOptions: ChartOptions<'bar'> = {
           return `Total: ${sum.toFixed(1)} mg`
         }
       }
+    },
+    legend: {
+      display: true // Always display the legend
+    }
+  },
+  onClick: (event, elements) => {
+    if (elements.length > 0) {
+      emit('chart-click')
     }
   }
-}
+}))
 </script>
 
 <template>
-  <Bar :data="chartData" :options="chartOptions" />
+  <Bar :data="chartData" :options="chartOptions" :class="{ 'full-size-chart': fullSize }"/>
 </template>
+
+<style scoped>
+.full-size-chart {
+  width: 100%;
+  height: 600px; /* Oder dynamische Höhe */
+}
+</style>
